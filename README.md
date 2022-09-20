@@ -21,6 +21,9 @@ Comparator interface allows us to do the same but in a more flexible way.
 
 * [Generic Bubble Sort ](#generic-bubble-sort) 
 * [Generic Insertion Sort ](#generic-insertion-sort) 
+* [Generic Selection Sort ](#generic-selection-sort) 
+* [Generic Linear Sort ](#generic-linear-sort) 
+* [Generic Radix Sort ](#generic-radix-sort) 
 
 
     
@@ -527,4 +530,316 @@ Comparator interface allows us to do the same but in a more flexible way.
    free(x);
    return 0;
    }
+
+
+## Generic Selection Sort  
+***
+### Description of Selection Sort  :
+
+* To `create` SelectionSortFunction
+   ```c
+   void Selection_Sort(void *ptr , int cs , int es , int (*p2f)(void* , void*))
+   {
+   int y,e,f,g,m,oep,iep,w; 
+   void *a,*b,*c;
+   c =(void*)malloc(es);
+   oep = cs-2;
+   iep = cs-1;
+   e=0;
+   while(e<= oep)
+   {
+   m=e;
+   f= e+1;
+   while(f<=iep)
+   {
+   a = ptr+( f*es);
+   b = ptr +( m*es);
+   w = p2f(a,b);
+   if(w<0)
+   {
+   m=f;
+   }
+   f++;
+   }
+   a= ptr+(e*es);
+   b = ptr+(m*es);
+   memcpy(c , (const void*)a, es);
+   memcpy(a, (const void*)b,  es);
+   memcpy(b, (const void*)c ,es);
+   e++;
+   }
+   free(c);
+   }
+
+
+
+* To `create` ComparatorFunction
+   ```c
+   This comparator function takes two arguments. Then compares them and get the relative order between them. 
+   
+   int My_Comparator(void *left , void *right)
+   {
+   int *a, *b;
+   a = (int*)left;
+   b= (int*) right;
+   return (*a) - (*b);
+   }
+
+
+* To `create` Main Function
+   ```c
+   // MAIN FUNCTION
+
+   int main ()
+   {
+   int *x,y,req;
+   printf("ENTER THE REQUIREMENT :");
+   scanf("%d" , &req);
+   if(req <0)
+   {
+   printf("INVALID REQUIREMENT\n");
+   return 0;
+   }
+   x =(int *)malloc(sizeof(int)*req);
+   if(x== NULL)
+   {
+   printf("UNABLE TO ALLOCATE MEMORY");
+   return 0;
+   }
+   y=0; 
+   while(y<req)
+   {
+   printf("ENTER THE NUMBER :");
+   scanf("%d" , &x[y]);
+   y++;
+   }
+   Selection_Sort(x, req, sizeof(int) , My_Comparator);
+   y=0;
+   while(y<req)
+   {
+   printf("%d\n", x[y]);
+   y++;
+   }
+   free(x);
+   return 0;
+   }
+
+
+## Generic Linear Sort  
+***
+### Description of Linear Sort  :
+
+* To `create` LinearSortFunction
+   ```c
+   void Linear_Sort (void *ptr , int cs , int es , int(*p2f)(void *, void *))
+   {
+   int e,f, oep, iep, w; 
+   void *a, *b ,*c;
+   c= (void *)malloc(es);
+   oep = cs-2;
+   iep = cs-1;
+   for(e=0; e<=oep; e++)
+   {
+   for(f= e+1; f<=iep; f++)
+   {
+   a = ptr +( f *  es);
+   b = ptr +( e * es);   
+   w = p2f(a,b);
+   if(w<0)
+   {
+   memcpy(c , (const void*)a , es);
+   memcpy(a , (const void*)b , es);
+   memcpy(b , (const void*)c , es);
+   } 
+   }
+   }
+   free(c);
+   }
+  
+* To `create` ComparatorFunction
+   ```c
+   This comparator function takes two arguments. Then compares them and get the relative order between them. 
+   
+   int My_Comparator(void *left , void *right)
+   {
+   int *a, *b;
+   a = (int*)left;
+   b= (int*) right;
+   return (*a) - (*b);
+   }
+
+
+* To `create` Main Function
+   ```c
+   // MAIN FUNCTION
+
+   int main ()
+   {
+   int *x, req , y;
+   printf(" ENTER THE REQUIREMENT :");
+   scanf("%d", &req);
+   if(req <= 0)
+   {
+   printf(" INVALID REQUIREMENT "); 
+   return 0;
+   }
+   x= (int *)malloc(sizeof(int)*req);
+   for(y=0; y<req; y++)
+   {
+   printf("ENTER THE NUMBER :");
+   scanf("%d", &x[y]);
+   }
+   Linear_Sort( x, req , sizeof(int) , my_Comparator);
+   for(y=0; y<req; y++)
+   {
+   printf("%d\n" , x[y]);
+   }
+   free(x);
+   return 0;
+   }
+
+## Generic radix Sort  
+***
+### Description of Radix Sort  :
+
+* To `create` Queue
+   ```c
+  typedef struct _queue_node
+  {
+  int num;
+  struct _queue_node *next;
+  }QueueNode;
+
+  typedef struct _queue
+  {
+  QueueNode *start;
+  QueueNode *end;
+  int size;
+  }Queue;
+
+  void  InitQueue(Queue *queue)
+  {
+  queue->start = NULL;
+  queue->end =NULL;
+  queue->size= 0;
+  }
+
+  int isQueueEmpty(Queue *queue)
+  {
+  return queue->size==0;
+  }
+
+
+  void AddToQueue(Queue *queue , int num)
+  {
+  QueueNode *t;
+  t = (QueueNode *)malloc(sizeof(QueueNode));
+  t->num = num;
+  t->next = NULL;
+  if(queue->start== NULL)
+  {
+  queue->start = t;
+  queue->end = t;
+  }
+  else
+  {
+  queue->end->next =t;
+  queue->end =t;
+  }
+  queue->size++;
+  }
+
+  int RemoveFromQueue(Queue *queue) 
+  {
+  int num;
+  QueueNode *t;
+  num = queue->start->num;
+  t= queue->start;
+  queue->start = queue->start->next;
+  free(t);
+  queue->size--;
+  return num;
+  }
+
+  void ClearQueue(Queue *queue)
+  {
+  QueueNode *t;
+  while(queue->start!=NULL)
+  {
+  t= queue->start;
+  queue->start = queue->start->next;
+  queue->size--;
+  free(t);
+  }
+  queue->end = NULL;
+  queue->size =0;
+  }
+
+
+* To `create` Main Function
+   ```c
+   // MAIN FUNCTION
+   int main ()
+   {
+   int x[10], y,e,f,i,num,largest,dc,k;
+   Queue queue[10];
+
+   for(int i=0; i<=9; i++) InitQueue(&queue[i]);
+   for(y=0; y<=9;y++)
+   {
+   printf("ENTER THE NUMBER :");
+   scanf("%d" , &x[y]);
+   }
+   largest= x[0];
+   for(y=1; y<=9; y++)
+   {
+   if(x[y] > largest ) largest = x[y]; 
+   }
+   dc= 1;
+   num =largest;
+   while(num >9)
+   {
+   num = num/10;
+   dc++;
+   }
+   e=10;
+   k=1;
+   f=1;
+   while(k<=dc)
+   {
+   y=0;
+   while(y<=9) 
+   {
+   num= x[y];
+   i = (num %e)/f;
+   AddToQueue(&queue[i] , num);
+   y++;
+   }
+   i=0;
+   y=0;
+   while(y<=9)
+   {
+   while(!isQueueEmpty(&queue[y]))
+   {
+   num = RemoveFromQueue(&queue[y]);
+   x[i] = num++;
+   i++;
+   }
+   y++;
+   }
+   e= e*10;
+   f= f*10;
+   k++;
+   }
+
+   for(y=0; y<=9; y++)
+   {
+   printf("%d\n" , x[y]);
+   }
+   return 0;
+   }  
+
+
+
+
 
