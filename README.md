@@ -26,6 +26,12 @@ Comparator interface allows us to do the same but in a more flexible way.
 * [Generic Radix Sort ](#generic-radix-sort) 
 
 
+* [ Heap Sort ](#heap-sort) 
+* [ PanCake Sort ](#pancake-sort) 
+* [ Counting Sort ](#counting-sort) 
+
+
+
     
 ## Generic Quick Sort  
 ***
@@ -840,6 +846,258 @@ Comparator interface allows us to do the same but in a more flexible way.
    }  
 
 
+
+##  Heap Sort  
+***
+### Description of Heap Sort  :
+
+* To `create` Heap Function
+   ```c
+   void Heap_Sort(  int *x , int lb , int ub)
+   {
+   int y,ri,ci,lci,rci,swi,g;
+   y = lb+1;
+   while(y<= ub)
+   {
+   ci =y;
+   while(ci > lb)
+   {
+   ri = (ci-1)/2;
+   if(x[ci] > x[ri])
+   {
+   g = x[ci];
+   x[ci] = x[ri];
+   x[ri] = g;
+   ci = ri;
+   }
+   else 
+   {
+   break;
+   }
+   }
+   y++;
+   }
+   y =ub;
+   while(y > lb)
+   {
+   g= x[lb];
+   x[lb] = x[y];
+   x[y] = g;
+   y--;
+   ri = lb;
+   while(ri < y)
+   {
+   lci = (ri *2)+ 1;
+   if(lci > y) break;
+   rci = lci + 1;
+   if(rci > y)
+   {
+   swi = lci;
+   }
+   else
+   {
+   if(x[lci] > x[rci])
+   {
+   swi = lci;
+   } 
+   else
+   {
+   swi = rci;
+   }
+   }
+   if(x[swi] > x[ri])
+   {
+   g = x[swi];
+   x[swi] = x[ri];
+   x[ri] = g;
+   ri = swi;
+   }
+   else
+   {
+   break;
+   }
+   }
+   }
+   }
+
+* To `create` Main Function
+   ```c
+   int main ()
+   {
+   int *x, y, req;
+ 
+   printf("ENTER THE REQUIREMENT :");
+   scanf("%d" , &req);
+   if(req < 0)
+   {
+   printf("INVALID REQUIREMENT\n");
+   return 0;
+   }
+   x = (int *)malloc(sizeof(int)*req);
+   if(x== NULL)
+   {
+   printf(" UNABLE TO ALLOCATE MEMORY\n");
+   return 0;
+   }
+
+   for(y=0; y<=req; y++)
+   {
+   printf("ENTER THE NUMBER :");
+   scanf("%d" , &x[y]);
+   }
+   Heap_Sort( x , 0, req);
+   for(y=0; y<=req; y++)
+   {
+   printf("%d\n" , x[y] );
+   }
+   return 0;
+   }
+
+
+##  PanCake Sort  
+***
+### Description of PanCake Sort  :
+
+* To `create` Pancake Sort Function
+   ```c
+   void Pancake_Sort( int *x , int lb , int ub)
+   {
+   int y,size, e,f,g,largest;
+   size = ub-lb +1;
+   while(size > 0)
+   {
+   largest = lb;
+   for(y=0; y<size; y++)
+   {
+   if(x[largest] < x[y])
+   {
+   largest = y;
+   }
+   }
+
+   if(largest == (size-1))
+   {
+   size--;
+   continue;
+   }
+   e= lb;
+   f =largest;
+   while(e <=f )
+   {
+   g= x[e];
+   x[e] = x[f];
+   x[f] = g;
+   e++;
+   f--;
+   }
+   e= lb;
+   f= size-1;
+   while(e<=f)
+   {
+   g= x[e];
+   x[e] = x[f];
+   x[f] = g;
+   e++;
+   f--;
+   }
+   size--;
+   }
+   }
+
+* To `create` Main Function
+   ```c
+   int main ()
+   {
+   int  *x , req,y;
+   printf("ENTER THE REQUIREMENT :");
+   scanf("%d" , &req);
+   if(req < 0)
+   {
+   printf("INVALID REQUIREMENT \n");
+   return 0;
+   }
+
+   x= (int *)malloc(sizeof(int)*req);
+   if(x== NULL)
+   {
+   printf("UNABLE TO ALLOCATE MEMORY %d  NUMBERS" , req);
+   return 0;
+   }
+
+   for(y=0; y<req; y++)
+   {
+   printf("ENTER THE NUMBER :");
+   scanf("%d" , &x[y]);
+   }
+   Pancake_Sort(x , 0 , req-1);
+
+   for(y=0; y<req; y++)
+   {
+   printf("%d\n" , x[y]);
+   }
+
+   return 0;
+   }
+
+
+##  Counting Sort  
+***
+### Description of Counting Sort  :
+
+   ```c
+   int main ()
+   {
+   int  x[10] , largest , y, size, num , i;
+   int *tmp;
+
+   for(y=0; y<10; y++)
+   {
+   printf("ENTER THE NUMBER :");
+   scanf("%d" , &x[y]);
+   }
+
+   largest = x[0];
+   for(y=0; y<10; y++)
+   {
+   if( largest < x[y])
+   {
+   largest = x[y];
+   }
+   }
+   size = largest +1;
+   tmp = (int *)malloc(sizeof(int)*size);
+   if(tmp == NULL)
+   {
+   printf("UNABLE TO ALLOCATE MEMEORY  %d  NUMBERS \n" , size);
+   return 0;
+   }
+   for(y=0; y<size; y++)
+   {
+   tmp[y] = 0;
+   }
+
+   for(y=0; y<10; y++)
+   {
+   num = x[y];
+   tmp[num]+=1;
+   }
+   i=0;
+   for(y=0; y<size; y++)
+   {
+   num = tmp[y];
+   while(num)
+   {
+   x[i] = y;
+   i++;
+   num-=1;
+   }
+   }
+   for(y=0;y<10; y++)
+   { 
+   printf("%d\n" , x[y]);
+   }
+   return 0;
+   }
 
 
 
