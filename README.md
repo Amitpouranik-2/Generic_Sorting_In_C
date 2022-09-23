@@ -25,10 +25,15 @@ Comparator interface allows us to do the same but in a more flexible way.
 * [Generic Linear Sort ](#generic-linear-sort) 
 * [Generic Radix Sort ](#generic-radix-sort) 
 
+ 
+* [ External Sort](#external-sort)  
+ 
+
 
 * [ Heap Sort ](#heap-sort) 
 * [ PanCake Sort ](#pancake-sort) 
 * [ Counting Sort ](#counting-sort) 
+* [ Shell Sort ](#shell-sort) 
 
 
 
@@ -1044,58 +1049,273 @@ Comparator interface allows us to do the same but in a more flexible way.
 ***
 ### Description of Counting Sort  :
 
+   * To `create` Main Function
+     ```c
+     int main ()
+     {
+     int  x[10] , largest , y, size, num , i;
+     int *tmp;
+
+     for(y=0; y<10; y++)
+     {
+     printf("ENTER THE NUMBER :");
+     scanf("%d" , &x[y]);
+     }
+
+     largest = x[0];
+     for(y=0; y<10; y++)
+     {
+     if( largest < x[y])
+     {
+     largest = x[y];
+     }
+     }
+     size = largest +1;
+     tmp = (int *)malloc(sizeof(int)*size);
+     if(tmp == NULL)
+     {
+     printf("UNABLE TO ALLOCATE MEMEORY  %d  NUMBERS       \n" , size);
+     return 0;
+     }
+     for(y=0; y<size; y++)
+     {
+     tmp[y] = 0;
+     }
+
+     for(y=0; y<10; y++)
+     {
+     num = x[y];
+     tmp[num]+=1;
+     }
+     i=0;
+     for(y=0; y<size; y++)
+     {
+     num = tmp[y];
+     while(num)
+     {
+     x[i] = y;
+     i++;
+     num-=1;
+     }
+     }
+     for(y=0;y<10; y++)
+     { 
+     printf("%d\n" , x[y]);
+     }
+     return 0;
+     }
+
+
+##  Shell Sort  
+***
+### Description of Shell Sort  :
+   
+   * To `create` Main Function
+      ```c
+      int main ()
+      {
+      int x[10],y,z,num,size,diff,lb,ub;
+      lb=0;
+      ub=9;
+      for(y=0; y<=9; y++)
+      {
+      printf("ENTER THE NUMBER :");
+      scanf("%d" , &x[y]);
+      }
+      size = (ub - lb) +1;
+      diff =size/2;
+      while(diff >= 1)
+      {
+      y =lb + diff;
+      while(y<= ub)
+      {
+      num =x[y];
+      z = y - diff;
+      while(z >= 0  && x[z] > num)
+      {
+      x[z+diff] = x[z];
+      z =z-diff;
+      }
+      x[z+diff] = num;
+      y =y + diff;
+      }
+      diff = diff/2;
+      }
+      for(y=0; y<=9; y++)
+      {
+      printf("%d\n" , x[y]);
+      }
+      return 0;
+      }
+
+
+##  External Sort  
+***
+### Description of External Sort  :
+
+   
+* To `Generate Random Number` Function
+   ```c
+   void GenerateRandomNumberString(char *name , int size)
+   {
+   int r1, r2, i;
+   i=0;
+   while(i < size)
+   {
+   r1 = rand()% 26;
+   r2 = rand()%2;
+   if(r2== 0)
+   {
+   name[i] = (char)(r1 + 65);
+   }
+   else
+   {
+   name[i] = (char)(r1 + 97);
+   }
+   i++;
+   }
+   name[i] = '\0';
+   } 
+
+   int countlines( char *filename)
+   {
+   FILE *f;
+   char a[21];
+   int line= 0;
+   f= fopen(filename , "r");
+   while(1)
+   {
+   fgets(a ,21, f);
+   if(feof(f)) break;
+   line++;
+   }
+   fclose(f);
+   return line;
+   }
+ 
+* To `Create`  Merge Function
+   ```c
+   void Merge(char *leftfile , char *rightfile , char *mergeto)
+   { 
+   int leftpos;
+   int rightpos;
+   FILE *f1, *f2 , *f3;
+   char left[21] , right[21];
+   int leftnum , rightnum;
+   f1 = fopen(leftfile , "r");
+   if(f1 == NULL)
+   { 
+   f1= fopen(leftfile , "w");
+   fclose(f1);
+   f1 = fopen(leftfile , "r");
+   }
+   f2 = fopen(rightfile , "r");
+   if(f2== NULL) 
+   {
+   f2 = fopen(rightfile , "w");
+   fclose(f2);
+   f2 = fopen(rightfile , "r");
+   }
+   f3 = fopen(mergeto , "w");
+   while(1)
+   {
+   leftpos = ftell(f1);
+   fgets(left , 21, f1);
+   if(feof(f1)) break;
+
+   rightpos = ftell(f2);
+   fgets(right , 21, f2);
+   if(feof(f2))    
+   { 
+   fputs(left , f3);
+   break;
+   }
+   left[strlen(left) -1] = '\0';
+   right[strlen(right)-1] = '\0';
+   leftnum = atoi(left);
+   rightnum = atoi(right);
+
+   if(leftnum < rightnum)
+   {
+   fputs(left , f3);
+   fputs("\n", f3);
+   fseek(f2 , rightpos , 0); 
+   }
+   else
+   {
+   fputs(right, f3);
+   fputs("\n" , f3);
+   fseek( f1 , leftpos , 0);
+   }
+    
+   while(1)
+   {
+   if(feof(f1)) break;
+   fgets(left ,21, f1);
+   if(feof(f1)) break;
+   fputs(left , f3);
+   }
+   while(1)
+   {
+   if(feof(f2)) break;
+   fgets(right , 21, f2);
+   if(feof(f2)) break;
+   fputs(right , f3);
+   }
+   fclose(f1);
+   fclose(f2);
+   fclose(f3);
+   }
+
+* To `Create`  Merge Sort Function
+   ```c
+   void MergeSort( char *filename , int NumberofLines)
+   {
+   FILE *left , *right , *file;
+   char leftfile[51] , rightfile[51];
+   int x;
+   char a[21];
+   int leftnumberoflines , rightnumberoflines;  
+   if(NumberofLines <= 1) return ;
+   leftnumberoflines = NumberofLines / 2;
+   rightnumberoflines = NumberofLines - leftnumberoflines;
+   file = fopen(filename , "r");
+   GenerateRandomNumberString(leftfile ,50);
+   left = fopen(leftfile , "w");
+   x= 1;
+   while(x <= leftnumberoflines)
+   {
+   fgets(a ,21, file);
+   fputs(a , left );
+   x++;
+   }
+   fclose(left);
+   GenerateRandomNumberString(rightfile ,50);
+   right = fopen( rightfile , "w");
+   x= 1;
+   while(x<= rightnumberoflines)
+   {
+   fgets(a, 21, file);
+   fputs(a, right);
+   x++;
+   }
+   fclose(right);
+   fclose(file);
+   MergeSort(leftfile , leftnumberoflines);
+   MergeSort(rightfile , rightnumberoflines);
+   Merge(leftfile  , rightfile , filename);
+   }
+   
+
+* To `create` Main Function
    ```c
    int main ()
    {
-   int  x[10] , largest , y, size, num , i;
-   int *tmp;
-
-   for(y=0; y<10; y++)
-   {
-   printf("ENTER THE NUMBER :");
-   scanf("%d" , &x[y]);
-   }
-
-   largest = x[0];
-   for(y=0; y<10; y++)
-   {
-   if( largest < x[y])
-   {
-   largest = x[y];
-   }
-   }
-   size = largest +1;
-   tmp = (int *)malloc(sizeof(int)*size);
-   if(tmp == NULL)
-   {
-   printf("UNABLE TO ALLOCATE MEMEORY  %d  NUMBERS \n" , size);
-   return 0;
-   }
-   for(y=0; y<size; y++)
-   {
-   tmp[y] = 0;
-   }
-
-   for(y=0; y<10; y++)
-   {
-   num = x[y];
-   tmp[num]+=1;
-   }
-   i=0;
-   for(y=0; y<size; y++)
-   {
-   num = tmp[y];
-   while(num)
-   {
-   x[i] = y;
-   i++;
-   num-=1;
-   }
-   }
-   for(y=0;y<10; y++)
-   { 
-   printf("%d\n" , x[y]);
-   }
+   int lines;
+   srand(time (NULL));
+   lines = countlines("datafile.ddd");
+   printf("%d\n", lines);
+   MergeSort("datafile.ddd" , lines);
    return 0;
    }
 
