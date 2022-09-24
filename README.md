@@ -13,7 +13,8 @@ Comparator interface allows us to do the same but in a more flexible way.
 
 `C++` You can sort a vector of custom objects using the `C++ STL` function `std::sort`. The sort function has an overloaded form that takes as arguments first, last, comparator. The first and last are iterators to first and last elements of the container. The ` comparator ` is a predicate function that can be used to tell how to sort the container. 
 
-
+* [Generic Merge Sort](#generic-merge-sort)  
+   * [ Recursion Merge Sort](#recursion-merge-sort-)
 
 * [Generic Quick Sort](#generic-quick-sort)  
    * [Multiple Stack Quick Sort](#multi-stack-quick-sort)
@@ -41,10 +42,491 @@ Comparator interface allows us to do the same but in a more flexible way.
 * [ Odd Even Sort ](#odd-even-sort) 
 * [ CockTail Shaker Sort ](#cocktail-shaker-sort) 
 * [ Binary Insertion Sort ](#binary-insertion-sort) 
-* [ Address Calculation Sort ](#address-calculation-sort ) 
+* [ Address Calculation Sort ](#address-calculation-sort) 
 
 
     
+
+
+
+
+## Generic Merge Sort  
+***
+### Description of Merge Sort :
+
+* To `create` Flag
+   ```c
+   #define SUCCESSFUL 1
+   #define FAILED 0
+
+* To `create`  Errors
+   ```c
+   #define NO_ERRORS 0  
+   #define NULL_VALUE 1
+   #define ELEM_SIZE_ZERO 2
+   #define MEM_ALLOC_ERROR 3
+   #define STACK_EMPTY  4
+
+
+* To `create` Init Stack Function
+   ```c
+   void  initStack( Stack *stack , int elementsize , int *successful , int *error)
+   {
+   if(successful !=NULL) *successful = FAILED;
+   if(error) *error = 0;
+   if(stack == NULL)
+   {
+   if(error) *error  =1;
+   return;
+   }
+   if(elementsize <= 0)
+   {
+   if(error) *error  = 2;
+   return;
+   }
+   stack->top = NULL;
+   stack->elementsize = elementsize;
+   stack->size = 0;
+   if(successful) *successful  = SUCCESSFUL;
+   }
+
+* To `create` Push Function
+   ```c
+   void Push(Stack *stack , void *ptr , int *successful , int *error )
+   {
+   StackNode *node;
+   if(successful) *successful = FAILED;
+   if(error) *error = 0;
+   if(stack== NULL) 
+   {
+   *error  =1;
+   return;
+   }
+   node = (StackNode *)malloc(sizeof(StackNode));
+   if(node == NULL)
+   {
+   if(error) *error = 3;
+   return;
+   }
+   if(ptr!= NULL)
+   {
+   node->ptr = (void *)malloc(stack->elementsize);
+   if(node->ptr==NULL)
+   {
+   free(node);  
+   if(error) *error = 3;
+   return;
+   }
+   memcpy(node->ptr , (const void *)ptr , stack->elementsize );
+   }
+   else
+   {
+   node->ptr = ptr;
+   }
+   node->next = stack->top;
+   stack->top = node;
+   stack->size++;
+   if(successful) *successful = SUCCESSFUL;
+   }
+
+* To `create` Pop Function
+   ```c
+   void Pop(Stack *stack , void *ptr , int *successful , int *error)
+   {
+   int j;
+   StackNode *node;
+   if(successful) *successful = FAILED;
+   if(error) *error = 0;
+   if(stack== NULL || ptr== NULL)
+   {
+   if(error) *error =1;
+   return;
+   }
+   if(stack->top == NULL)
+   {
+   if(error) *error =4;
+   return;
+   }
+   if(stack->top->ptr == NULL) 
+   {
+   for(j=0; j< stack->elementsize ; j++)
+   {
+   *((char*)(ptr+j)) = (char)0;
+   }
+   }
+   else
+   {
+   memcpy(ptr , (const void *)stack->top->ptr , stack->elementsize);
+   }
+   node = stack->top;
+   stack->top = stack->top->next;
+   if(node->ptr!= NULL) free(node->ptr);
+   free(node);
+   stack->size--;
+   if(successful) *successful = SUCCESSFUL;
+   }
+
+* To `create` IsEmpty Function
+   ```c
+   int isEmpty(Stack *stack , int *successful , int *error )
+   {
+   if(successful) *successful = FAILED;
+   if(error) *error = 0;
+   if(stack== NULL) 
+   {
+   if(error) *error = 1;
+   return 1;
+   }
+   if(successful) *successful = SUCCESSFUL;
+   if(stack->size == 0) return 1;
+   return 0;
+   }
+
+* To `create` Clear Stack Function
+   ```c
+   void clearStack( Stack *stack , int *successful , int *error) 
+   {
+   StackNode *node;
+   if(successful) *successful = FAILED;
+   if(error) *error = 0;
+   if(stack== NULL) 
+   {
+   *error = 1;
+   return;
+   }
+   while(stack->top!= NULL)
+   {
+   node = stack->top;
+   stack->top = stack->top->next;
+   if(node->ptr != NULL) free(node->ptr);
+   free(node); 
+   }
+   stack->size = 0;
+   if(successful) *successful = SUCCESSFUL;
+   }
+
+
+
+
+
+
+
+   
+* To `create` Merge Function
+   ```c
+   void Merge(void  *x, int (*p2f)(void *, void *) , int es , int lb1 , int ub1, int lb2 , int ub2 , int *successful , int *error)
+   {
+   void *tmp;
+   int i1,i2,i3;
+   if(successful) *successful = FAILED;
+   if(error) *error =0;
+   if(x== NULL || p2f == NULL)
+   {
+   if(error) *error =1;
+   return;
+   }
+   if(es <= 0)
+   {
+   if(error) *error = 2;
+   return;
+   }
+   int size1,size2,size3;
+   size1 = (ub1 -lb1) +1;
+   size2 = (ub2 - lb2) +1;
+   size3 = size1 + size2;
+   tmp = (void *)malloc(es*size3);
+   if(tmp == NULL)
+   {
+   if(error) *error = 3;
+   return;
+   }
+   i1= lb1;
+   i2= lb2;
+   i3 = 0;
+   while(i1 <= ub1 && i2<= ub2)
+   {
+   if(p2f(x +(i1*es) , x+(i2*es)) < 0)
+   {
+   memcpy(tmp+(i3*es) , (const void *)(x+ (i1*es)) , es);
+   i1++;
+   }
+   else
+   {
+   memcpy(tmp+(i3*es) , (const void *)(x+ (i2*es)) , es);
+   i2++; 
+   }
+   i3++; 
+   }
+   while( i1 <= ub1)
+   {
+   memcpy(tmp+(i3*es) , (const void *)(x+ (i1*es)) , es);
+   i1++;
+   i3++; 
+   }
+   while(i2 <= ub2)
+   {
+   memcpy(tmp+(i3*es) , (const void *)(x+ (i2*es)) , es);
+   i2++;
+   i3++;
+   }
+   i3= 0;
+   i1 = lb1;
+   while(i1<= ub1)
+   {  
+   memcpy( x +(i1*es) , (const void *)(tmp+ (i3*es)) , es);
+   i1++;
+   i3++;
+   }
+   i2 =lb2;
+   while(i2 <= ub2)
+   {
+   memcpy(x +(i2*es) , (const void *)(tmp+ (i3*es)) , es);
+   i2++;
+   i3++; 
+   }    
+   free(tmp);
+   if(successful) *successful = SUCCESSFUL;
+   }
+
+
+
+* To `create` Merge Sort Function
+   ```c
+   void MergeSort( void  *x, int (*p2f)(void * , void *) , int es, int lowerbound , int upperbound, int *successful , int *error )
+   {
+   struct LBUB 
+   {
+   int lb, ub;
+   };
+   int isSuccessful , errorNumber; 
+   struct LBUB lbub;
+   int a,b;
+   Stack stack1;
+   Stack stack2;
+   int mid;
+   if(successful) *successful = FAILED;
+   if(error) *error =0;
+   initStack(&stack1 , sizeof(struct LBUB) , &isSuccessful , &errorNumber);
+   initStack(&stack2 , sizeof(struct LBUB) , &isSuccessful , &errorNumber);
+   lbub.lb = lowerbound;
+   lbub.ub = upperbound;
+   Push( &stack1 , (void*)&lbub, &isSuccessful , &errorNumber);
+   if(!isSuccessful)
+   {
+   *error = errorNumber;
+   clearStack(&stack1 , &isSuccessful , &errorNumber);
+   clearStack(&stack2 , &isSuccessful , &errorNumber);
+   return;
+   }
+
+
+   while(!isEmpty(&stack1, &isSuccessful , &errorNumber))
+   {
+   Pop(&stack1 , (void*)&lbub ,&isSuccessful , &errorNumber);
+   Push( &stack2 , (void*)&lbub, &isSuccessful , &errorNumber);
+   if(!isSuccessful)
+   {
+   *error = errorNumber;
+   clearStack(&stack1 , &isSuccessful , &errorNumber);
+   clearStack(&stack2 , &isSuccessful , &errorNumber);
+   return;
+   }
+   a= lbub.lb;
+   b= lbub.ub;
+   mid = (a+b)/2;
+   if(a< mid)
+   {
+   lbub.lb =a;
+   lbub.ub = mid;
+   Push( &stack1 , (void*)&lbub, &isSuccessful , &errorNumber);
+   if(!isSuccessful)
+   {
+   *error = errorNumber;
+   clearStack(&stack1 , &isSuccessful , &errorNumber);
+   clearStack(&stack2 , &isSuccessful , &errorNumber);
+   return;
+   }
+   }
+   if(mid+1 < b)
+   {
+   lbub.lb = mid+1;
+   lbub.ub = b;
+   Push( &stack1 , (void*)&lbub , &isSuccessful , &errorNumber);
+   if(!isSuccessful)
+   {
+   *error = errorNumber;
+   clearStack(&stack1 , &isSuccessful , &errorNumber);
+   clearStack(&stack2 , &isSuccessful , &errorNumber);
+   return;
+   }
+   }
+   }
+   while(!isEmpty(&stack2 , &isSuccessful , &errorNumber))
+   {
+   Pop(&stack2 ,(void*)&lbub , &isSuccessful , &errorNumber);
+   a = lbub.lb;
+   b = lbub.ub;
+   mid =(a+b)/2;
+   Merge(x,p2f,es,a,mid,mid+1, b , &isSuccessful , &errorNumber);
+   if(!isSuccessful)
+   {
+   *error = errorNumber;
+   clearStack(&stack1 , &isSuccessful , &errorNumber);
+   clearStack(&stack2 , &isSuccessful , &errorNumber);
+   return; 
+   } 
+   }     
+   if(successful ) *successful = SUCCESSFUL;
+   }
+
+
+* To `create` Comparator Function
+   ```c
+   This comparator function takes two arguments. Then compares them and get the relative order between them. 
+   int intComparator( void *left , void *right)
+   {
+   return (*((int *)left)) - (*((int*)right)); 
+   }
+
+
+
+* To `create` Main Function
+   ```c
+   // MAIN FUNCTION
+   int main ()
+   {
+   int *x, y ,req;
+   int isSuccessful , errorNumber;
+   printf("Enter requirment :");
+   scanf("%d" , &req);
+   if(req <= 0)
+   {
+   printf("invalid requirement\n");
+   return 0;
+   }
+   x =(int*)malloc(sizeof(int)*req);
+   if(x== NULL)
+   {
+   printf("unable to allocate memory \n");
+   return 0;
+   }
+   for(y=0; y<req; y++)
+   {
+   printf("Enter the number :");
+   scanf("%d" , &x[y]);
+   }
+   MergeSort( (void*)x, intComparator ,  sizeof(int), 0, req-1, &isSuccessful , &errorNumber);
+   for( y=0; y<req; y++)
+   {
+   printf("%d\n" , x[y]);
+   }
+   free(x);
+   return 0;
+   }
+
+  
+
+### Recursion Merge Sort :
+  
+* To `create` Merge Function
+   ```c
+   void Merge( int *x , int lb , int mid , int ub )
+   {
+   int i1,i2,i3, tmpsize, lb1,lb2, lb3, ub1,ub2,ub3;
+   int *tmp;
+   tmpsize = (ub - lb)+1;
+   tmp = (int *)malloc(sizeof(int)*tmpsize);
+   lb1 = lb;
+   ub1 = mid;
+   lb2 = mid+1;
+   ub2 = ub;
+
+   lb3 = 0;
+   ub3 = tmpsize-1;
+   i1= lb1;
+   i2 = lb2;
+   i3 = lb3;
+
+   while(i1 <= ub1   && i2 <= ub2)
+   {
+   if(x[i1]< x[i2])
+   {
+   tmp[i3] = x[i1];
+   i1++;
+   }
+   else
+   {
+   tmp[i3] = x[i2];
+   i2++;
+   }
+   i3++;
+   }
+   while(i1 <= ub1)
+   {
+   tmp[i3] = x[i1];
+   i1++;
+   i3++;
+   }
+   while(i2 <= ub2)
+   {
+   tmp[i3] = x[i2];
+   i2++;
+   i3++;
+   }
+   i1= lb1;
+   i3 =0;
+   while( i1 <= ub2)
+   {
+   x[i1] = tmp[i3];
+   i1++;
+   i3++;
+   }
+   free(tmp);
+   }
+
+
+* To `create` Merge Sort Function
+   ```c
+   void Merge_Sort( int *x , int low , int high )
+   {
+   int mid;  
+   if(low < high)
+   { 
+   mid = (low + high)/2;
+   Merge_Sort(x , low , mid);
+   Merge_Sort(x, mid +1 , high);
+   Merge(x , low , mid , high);
+   }
+   }
+
+* To `create` Main Function
+   ```c
+   int main ()
+   {
+   int x[10],y;
+   for(y=0; y<=9; y++)
+   {
+   printf("ENTER THE NUMBER :");
+   scanf("%d" , &x[y]);
+   }
+   Merge_Sort(x , 0, 9 );
+   for(y=0; y<= 9; y++) 
+   { 
+   printf("%d\n" , x[y]);
+   }
+   return 0;
+   }
+   ```
+
+
+
+
+
+
+
+
+
+
 ## Generic Quick Sort  
 ***
 ### Description of Quick Sort :
