@@ -27,14 +27,21 @@ Comparator interface allows us to do the same but in a more flexible way.
 
  
 * [ External Sort](#external-sort)  
+* [ External Sort Linked List ](#external-sort-linked-list)  
+
+
  
-
-
 * [ Heap Sort ](#heap-sort) 
 * [ PanCake Sort ](#pancake-sort) 
 * [ Counting Sort ](#counting-sort) 
 * [ Shell Sort ](#shell-sort) 
-
+* [ Pigeon Hole Sort ](#pigeon-hole-sort) 
+* [ Gnome Sort ](#gnome-sort) 
+* [ Stooge Sort ](#stooge-sort) 
+* [ Odd Even Sort ](#odd-even-sort) 
+* [ CockTail Shaker Sort ](#cocktail-shaker-sort) 
+* [ Binary Insertion Sort ](#binary-insertion-sort) 
+* [ Address Calculation Sort ](#address-calculation-sort ) 
 
 
     
@@ -1320,4 +1327,721 @@ Comparator interface allows us to do the same but in a more flexible way.
    }
 
 
+##   External Sort Linked List 
+***
+### Description of External Sort  :
 
+   
+* To `Create` Add Collection Function
+   ```c
+   struct Node 
+   {
+   int num;
+   struct Node *next;
+   };
+   struct Node *start;
+   void addToCollection(int num)
+   {
+   struct Node *t;
+   t= (struct Node *)malloc(sizeof(struct Node));
+   t->num = num;
+   t->next =start;
+   start = t;
+   }
+   // PRINT LINE
+   void printline()
+   {
+   struct Node *t;
+   for(t=start; t; t=t->next)
+   {
+   printf("%d\n" , t->num);
+   }
+   }  
+   
+
+* To `Create` Merge Function
+   ```c
+   sruct Node *merge(struct Node *firstlist , struct Node *secondlist)
+   {
+   struct Node *left , *right , *end , *newlist;
+   if(firstlist == NULL || secondlist== NULL) return NULL;
+   if(firstlist== NULL) return secondlist;
+   if(secondlist== NULL) return firstlist;
+   newlist = NULL;
+   left = firstlist;
+   right = secondlist;
+   while(left && right)
+   {
+   if(left->num < right->num)
+   {
+   if(newlist == NULL) newlist = left;
+   else end->next = left;
+   end = left;
+   left =left->next;
+   }
+   else
+   {
+   if(newlist== NULL) newlist = right;
+   else end->next = right;
+   end = right;
+   right = right->next; 
+   }
+   end->next = NULL;
+   }
+   if(left) end->next = left;
+   if(right) end->next = right;
+   return newlist;
+   }
+
+* To `Create` Spilter Function
+   ```c
+   void spilter(struct Node *top , struct Node **firstlist , struct Node **secondlist)
+   {
+   struct Node *t , *tt;
+   if(top == NULL) 
+   {
+   *firstlist = NULL;
+   *secondlist= NULL;
+   return;
+   }
+   if(top->next == NULL) 
+   {
+   *firstlist = top ;
+   *secondlist = NULL;
+   return;
+   }
+   t= top ;
+   tt = top->next;
+   while(tt!= NULL)
+   {
+   tt =tt->next;
+   if(tt!= NULL)
+   {
+   t=t->next;
+   tt=tt->next;
+   }
+   }
+   *firstlist =top;
+   *secondlist =t->next;
+   t->next = NULL;
+   }
+
+* To `Create` MergeSort Function
+   ```c
+   void mergeSort( struct Node **top)
+   {
+   struct Node *firstlist , *secondlist;
+   if(*top == NULL || (*top)->next == NULL) return ;
+   spilter(*top , &firstlist , &secondlist);
+   mergeSort(&firstlist);
+   mergeSort(&secondlist);
+   *top = merge(firstlist , secondlist);
+   }
+
+* To `Create` Main Function
+   ```c
+   int main ()
+   {
+   char m;
+   int num;
+   start = NULL;
+   while(1)
+   {
+   printf("Enter the number :");
+   scanf("%d" , &num);
+   fflush(stdin);
+   addToCollection(num);
+   printf("Add More (Y/N):");
+   m= getchar();
+   fflush(stdin);
+   if(m!= 'Y' && m!= 'y') break;
+   }
+   mergeSort(&start);
+   printline();
+   return 0;
+   }
+
+
+
+##  Pigeon Hole Sort  
+***
+### Description of Pigeon Hole Sort  :
+
+   
+* To `Create` Insert Function
+   ```c
+   struct node
+   {
+   int data;
+   struct node *next;
+   };
+   struct node **nodeList;
+   void Insert( int data  , int index)
+   {
+   struct node *temp , *t;
+   temp = (struct node *)malloc(sizeof(struct node)); 
+   temp->data = data;
+   if(nodeList[index] == NULL || data < nodeList[index]->data)
+   {
+   temp->next = nodeList[index];
+   nodeList[index] = temp;
+   return;
+   }
+   else
+   {
+   t = nodeList[index];
+   while(t->next!= NULL && t->next->data < data)
+   {
+   t = t->next;
+   }
+   temp->next = t->next;
+   t->next = temp;
+   }
+   }
+
+* To `Create` Pigeon Hole Function
+   ```c
+   void Pigeon_Hole_Sort( int *x , int lb , int ub)
+   {
+   int y,largest , smallest , index , i , range , size;
+   size = ub-lb +1;
+   largest = x[0];
+   smallest = x[0];
+   for(y= lb+1; y<size; y++)
+   {
+   if(largest < x[y]) largest = x[y];
+   if(smallest > x[y] ) smallest = x[y];
+   }
+   range = largest - smallest + 1;
+   nodeList = (struct node **)malloc(sizeof(struct node *)*range);
+
+   for(y=0; y<range; y++)
+   {
+   nodeList[y] = NULL;
+   }
+   for(y=lb; y<size; y++)
+   {
+   index = x[y] - smallest;
+   Insert( x[y] , index); 
+   }
+
+   i=0;
+   for(y=0; y<range; y++)
+   {
+   while(nodeList[y] != NULL)
+   {
+   x[i] = nodeList[y]->data;
+   nodeList[y]  = nodeList[y]->next;
+   i++;
+   }
+   }
+   free(nodeList);
+   }
+
+* To `Create` Main Function
+   ```c
+   int main ()
+   {
+   int *x , y , req;
+
+   printf("ENTER THE REQUIREMENT :");
+   scanf("%d" , &req);
+   if(req < 0)
+   {
+   printf("INVALID REQUIRMENT\n");
+   return 0;
+   }
+
+   x = (int *)malloc(sizeof(int)*req);
+   if(x== NULL)
+   {  
+   printf("UNABLE TO ALLOCATE MEMORY \n");
+   return 0;
+   }
+
+   for(y=0; y< req; y++)
+   {
+   printf("ENTER THE NUMBER :");
+   scanf("%d" , &x[y]);
+   }
+   Pigeon_Hole_Sort( x , 0, req-1);
+
+   for(y=0; y<req; y++)
+   {
+   printf("%d\n" , x[y]);
+   }
+   return 0;
+   }
+
+
+##  Gnome Sort  
+***
+### Description of Gnome Sort  :
+
+   
+* To `Create` Gnome Sort Function
+   ```c
+   void Gnome_Sort(int *x , int lb , int ub)
+   {
+   int j,g;
+   j=lb;
+   while(j<= ub)
+   {
+   if(j== lb) j++;
+   if(x[j] < x[j-1])
+   {
+   g = x[j];
+   x[j] = x[j-1];
+   x[j-1] = g;
+   j--;
+   }
+   else
+   {
+   j++;
+   }
+   }
+   }
+
+
+   
+* To `Create` Main Function
+   ```c
+   int main ()
+   {
+   int *x, req, y;
+   printf("ENTER THE REQUIREMENT :");
+   scanf("%d" , &req);
+   if(req < 0)
+   {
+   printf(" INVALID REQUIREMENT\n");
+   return 0;
+   }
+
+   x = (int *)malloc(sizeof(int)*req);
+   if(x== NULL)
+   {
+   printf("UNABLE TO ALLOCATE MEMORY\n");
+   return 0;
+   }
+
+   for(y=0; y<req; y++)
+   {
+   printf(" ENTER THE NUMBER : ");
+   scanf("%d" , &x[y]);
+   }
+
+   Gnome_Sort(x, 0 , req-1);
+
+   for(y=0; y<req; y++)
+   {
+   printf("%d\n" , x[y]);
+   }
+   free(x);
+   return 0;
+   }
+
+
+##  Stooge Sort  
+***
+### Description of Stooge Sort  :
+
+   
+* To `Create` Stooge Function
+   ```c
+   void Stooge_Sort( int *x , int lb , int ub)
+   {
+   int y, size, i ,g;
+   size = ub-lb +1;
+   if(lb >= ub) return;
+   if(x[lb] > x[ub])
+   {
+   g= x[lb];
+   x[lb] = x[ub];
+   x[ub] = g;
+   }
+   if(size > 2)
+   {
+   i = size /3;
+   Stooge_Sort(x , lb , ub - i);
+   Stooge_Sort(x , lb +  i , ub);
+   Stooge_Sort( x, lb , ub - i);
+   }
+   }
+
+
+* To `Create` Main Function
+   ```c
+   int main ()
+   {
+   int *x , y , req;
+   printf("ENTER THE REQUIREMENT :");
+   scanf("%d" , &req);
+   if(req < 0)
+   { 
+   printf("INVALID REQUIREMENT");
+   return 0;
+   }
+   x = (int*)malloc(sizeof(int)*req);
+   if(x== NULL)
+   {
+   printf("UNABLE TO ALLOCATE MEMEORY \n");
+   return 0;
+   }
+
+   for(y=0; y<req; y++)
+   {
+   printf("ENTER THE NUMBER :");
+   scanf("%d" , &x[y]);
+   }
+   Stooge_Sort(x , 0 , req -1);
+
+   for(y=0; y<req; y++)
+   {
+   printf("%d\n" , x[y]);
+   }
+   return 0;
+   }
+
+
+##  Odd Even Sort  
+***
+### Description of Odd Even Sort  :
+
+   
+* To `Create` Main Function
+   ```c
+   int main ()
+   {
+   int x[10] , e,f,g,y,swapCount;
+   for(y=0; y<=10; y++)
+   {
+   printf("ENTER THE NUMBER :");
+   scanf("%d" , &x[y]);
+   }
+   while(1)
+   {
+   swapCount =0;
+   e=1; 
+   f=2;
+   while(e<=7)
+   {
+   if(x[f] < x[e])
+   {
+   g = x[e];
+   x[e] = x[f];
+   x[f] = g;
+   swapCount++;
+   }
+   e+=2;
+   f+=2;
+   }
+   e=0;
+   f=1;
+   while(e<=8)
+   {
+   if(x[f] < x[e])
+   {
+   g= x[e];
+   x[e] = x[f];
+   x[f] = g;
+   swapCount++;
+   }
+   e+=2;
+   f+=2;
+   }
+   if(swapCount == 0) break;
+   }
+   for(y=0; y<=10; y++)
+   {
+   printf("%d\n" , x[y]);
+   }
+   return 0;
+   }
+
+
+
+##  CockTail Shaker Sort  
+***
+### Description of CockTail Shaker Sort  :
+
+   
+* To `Create` CockTail Shaker Function
+   ```c
+   void CocktailShakersort( int *x , int lb , int ub)
+   { 
+   int i,y,size,g , swap;
+   size = ub- lb + 1;
+   swap =1;
+   while(swap)
+   {
+   swap = 0;
+   for( i = lb; i<=(size - 2); i++ )
+   {
+   if(x[i+1] < x[i])
+   {
+   g = x[i+1];
+   x[i+1] = x[i];
+   x[i] = g;
+   swap =1;
+   }
+   }
+   if(swap == 0) break;
+   swap =0;
+   ub--;
+   for(i = ub -1 ; i>= lb; i--)
+   {
+   if(x[i+1] < x[i])
+   {
+   g = x[i+1];
+   x[i+1] = x[i];
+   x[i] = g;
+   swap =1;
+   }
+   }
+   lb++;
+   }
+   }
+
+
+* To `Create` Main Function
+   ```c
+   int main ()
+   {
+   int *x, req, y;
+
+   printf("ENTER THE REQUIREMENT :");
+   scanf("%d" , &req);
+   if(req < 0)
+   {
+   printf(" INVALID REQUIREMENT \n");
+   return 0;
+   }
+   x = (int *)malloc(sizeof(int)*req);
+   if(x == NULL)
+   {
+   printf(" UNABLE TO ALLOCATE MEMORY\n");
+   return 0;
+   }
+
+   for(y=0; y<req; y++)
+   {
+   printf("ENTER THE NUMBER :"); 
+   scanf("%d" , &x[y]);
+   }
+   CocktailShakersort(x , 0 , req - 1);
+
+   for(y=0; y<req; y++)
+   {
+   printf("%d\n" , x[y]);
+   }
+   return 0;
+   }
+
+
+
+
+##  Binary Insertion Sort  
+***
+### Description of Binary Insertion Sort  :
+
+   
+* To `Create` Binary Insertion Function
+   ```c
+   void Binary_Insertion_Sort( int *x , int lb , int ub)
+   {
+   int mid , num, z , size ,y , si , ei;
+   size = ub - lb +1;
+   for(y= lb+1; y<size; y++)
+   {
+   num = x[y];
+   z = y-1;
+   si = lb;
+   ei = z;
+   while(si <= ei)
+   {
+   mid = si + ((ei - si)/2);
+   if(num == x[mid])
+   {
+   si = mid;
+   break;
+   }
+   if( num  < x[mid]) 
+   {
+   ei = mid -1;
+   }
+   else
+   {
+   si  = mid +1;
+   }
+   }
+   while( z >= si)
+   {
+   x[z+1] = x[z];
+   z--;
+   }
+   x[z+1] = num;
+   }
+   }
+
+
+
+* To `Create` Main Function
+   ```c
+   int main ()
+   {
+   int y,req , *x;
+   printf("ENTER THE REQUIREMENT :");
+   scanf("%d" , &req);
+   if(req < 0 )
+   {
+   printf("INVALID REQUIRMENT \n");
+   return 0;
+   }
+   x = ( int *)malloc(sizeof(int)*req);
+   if(x== NULL)
+   {
+   printf("UNABLE TO ALLOCATE MEMORY\n");
+   return 0;
+   }
+
+   for(y=0; y<req; y++)
+   {
+   printf("ENTER THE NUMBER : ");
+   scanf("%d" , &x[y]);
+   }
+
+   Binary_Insertion_Sort( x , 0 , req -1);
+
+   for(y=0; y<req; y++) 
+   { 
+   printf("%d\n" , x[y]);
+   }
+   return 0;
+   }
+
+##  Address Calculation Sort  
+***
+### Description of  Address Calculation Sort  :
+
+   
+* To `Create` Hash Function
+   ```c
+   struct node 
+   {
+   int data;
+   struct node *next;
+   };
+   struct node **buckets;
+   int HashFunction( int num , int count)
+   {
+   int i=1;
+   while( i< count)
+   {
+   num = num/10;
+   i++;
+   }
+   return num;
+   }
+
+* To `Create` Insert Into Buckets Function
+   ```c
+   void InsertIntoBuckets( int data  , int Address)
+   {
+   struct node *temp, *t;
+   temp = (struct node *)malloc(sizeof(struct node));
+   temp->data = data;
+   if(buckets[Address] == NULL || data < buckets[Address]->data)
+   {
+   temp->next = buckets[Address];
+   buckets[Address] = temp;
+   return ;
+   }
+   else
+   {
+   t =buckets[Address];
+   while(t->next != NULL && t->next->data < data)
+   {
+   t= t->next;
+   }
+   temp->next = t->next;
+   t->next = temp;
+   } 
+   }
+
+* To `Create` Address Calculation Function
+   ```c
+   void Address_calculation_sort( int *x , int lb , int ub)
+   {
+   int y, size, largest , countOfLargest , num , Address , i;
+   size = ub-lb+1;
+   buckets = (struct node **)malloc(sizeof(struct node *)*size);
+   for(y=lb; y<size; y++)
+   {
+   buckets[y] = NULL;
+   }
+   largest = x[lb];
+   for(y=lb+1; y<size; y++)
+   {
+   if(largest < x[y])
+   {
+   largest = x[y];
+   }
+   }
+   countOfLargest = 1;
+   num = largest;
+   while(num > 9)
+   {
+   countOfLargest++;
+   num = num/10;
+   }
+   HashFunction( num , countOfLargest);
+   for(y= lb; y<size; y++)
+   {
+   num = x[y];
+   Address = HashFunction( num , countOfLargest);
+   InsertIntoBuckets( num , Address);
+   }
+   i=0; 
+   for(y=0; y<size; y++ )
+   {
+   while(buckets[y]!= NULL)
+   {
+   x[i] = buckets[y]->data;
+   buckets[y] =  buckets[y]->next;
+   i++;
+   }
+   }
+   free(buckets);
+   }
+
+* To `Create` Main Function
+   ```c
+   int main ()
+   {
+   int *x , req, y;
+   printf("ENTER THE REQUIREMENT  :");
+   scanf("%d" , &req);
+   if(req < 0)
+   {
+   printf("INVALID REQUIREMENT\n");
+   return 0;
+   }
+   x= (int *)malloc(sizeof(int )*req);
+   if(x == NULL)
+   {
+   printf("UNABLE TO ALLOCATE MEMORY FOR %d NUMBER " , req);
+   return 0;
+   }
+   for(y=0; y<req; y++)
+   {
+   printf("ENTER THE NUMBER : ");
+   scanf("%d"  , &x[y]);
+   }
+   Address_calculation_sort(x , 0 , req-1);
+   for(y=0; y<req; y++) 
+   {
+   printf("%d\n" , x[y]);
+   }
+   free(x);
+   return 0;
+   }
